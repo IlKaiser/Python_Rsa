@@ -61,38 +61,41 @@ def public_exp(phi):
         a,_ = eea(phi,e)
     return e
 
+def rsa_keypair():
+    p = 0
+    q = 0
+    while(p == q):
+        p = prng()
+        q = prng()
+    n   = p*q
+    phi = (p-1)*(q-1)
+    e   = public_exp(phi)
+    one,d   = eea(phi,e)
+    assert one == (e*d)%phi == 1
+    return e,d,n
 
-p = prng()
-q = prng()
-assert p!=q 
-n = p*q
-phi = (p-1)*(q-1)
+def rsa_encrypt(mess,e,n):
+    return (mess**e)%n
 
-e = public_exp(phi)
-one,d = eea(phi,e) 
-assert phi > e 
-assert (e*d) % phi == 1
-assert 1 == one
-p = prng()
-q = prng()
-phi=(p-1)*(q-1)
-n = p*q
-e = public_exp(phi)
-one,d=eea(phi,e)
-assert one == (e*d)%phi == 1
+def rsa_decrypt(encrypted,d,n):
+    return (encrypted**d)%n
 
-print ("p: "+str(p))
-print ("q: "+str(q))
-print ("n: "+str(n))
-print ("phi: "+str(phi))
-print ("e: "+str(e))
-print ("d: "+str(d))
 
-import base64
-x = int(input())
-y = (x**e)%n
 
-print(y)
-dec = (y**d)%n 
-print(dec)
+e,d,n = rsa_keypair()
+print("Public Key        E: "+str(e))
+print("Public            N: "+str(n))
 
+print("Private Key       D: "+str(d))
+x=random.randrange(int(sqrt(n)))
+print("Message           X: "+str(x))
+
+# Encrypt with public
+y   = rsa_encrypt(x,e,n)
+print("Encrypted Message Y: "+str(y))
+
+# Decrypt with private
+dec = rsa_decrypt(y,d,n)
+
+print("Decrypted Message  : "+str(dec))
+print("Is ok? [True/False]: "+str(dec == x))
