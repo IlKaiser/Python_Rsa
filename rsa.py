@@ -26,13 +26,14 @@ def eea(a,b):
     
     return a,t0%original_a
 import random
+
 ## Fermat Primiality test
 
 def is_prime(a):
     if a < 4:
         return True
     rand=random.randrange(2,a-1)
-    return (rand**(a-1))%a == 1
+    return pow(rand,a-1,a) == 1
 
 ## Brute force primality test
 
@@ -45,15 +46,20 @@ def prime(a):
     return True
 
 ## Prime random number generator
-
-def prng():
-    rand=random.randrange(2,1000)
-    while not prime(rand) :
-        rand=random.randrange(2,1000)
+## Python3.9 Required to test!
+def prng(n=128):
+    rand=int.from_bytes(random.randbytes(n),"big")
+    print("Size: "+str(rand.bit_length()))
+    while not is_prime(rand) :
+        rand=int.from_bytes(random.randbytes(n),"big")
     return rand
 
 ## Public Exponend computer
-def public_exp(phi):
+def public_exp(phi, standard=True):
+    # Default e acording to standards
+    if standard:
+        return 65537
+    # Choose a random e
     a = 0
     e = 0
     while(a!=1):
@@ -61,33 +67,58 @@ def public_exp(phi):
         a,_ = eea(phi,e)
     return e
 
-def rsa_keypair():
+def rsa_keypair(n=2048):
+    size_q = n // 2
+    size_p = n - size_q
+    print(size_q)
     p = 0
     q = 0
     while(p == q):
-        p = prng()
-        q = prng()
+        p = prng(size_p//8)
+        q = prng(size_q//8)
     n   = p*q
     phi = (p-1)*(q-1)
     e   = public_exp(phi)
     one,d   = eea(phi,e)
     assert one == (e*d)%phi == 1
     return e,d,n
+def rsa_keypair_debug(n=2048):
+    size_q = n // 2
+    size_p = n - size_q
+    print(size_q)
+    p = 0
+    q = 0
+    while(p == q):
+        p = prng(size_p//8)
+        q = prng(size_q//8)
+    n   = p*q
+    phi = (p-1)*(q-1)
+    e   = public_exp(phi)
+    one,d   = eea(phi,e)
+    assert one == (e*d)%phi == 1
+    return e,d,n,p,q,phi
 
 def rsa_encrypt(mess,e,n):
-    return (mess**e)%n
+    return pow(mess,e,n)
 
 def rsa_decrypt(encrypted,d,n):
-    return (encrypted**d)%n
+    return pow(encrypted,d,n)
 
 
-
-e,d,n = rsa_keypair()
+from Crypto.PublicKey import RSA
+e,d,n,p,q,phi = rsa_keypair_debug()
+key=RSA.construct((n,e,d), consistency_check=True)
+print(key.export_key())
+print(key.publickey().export_key())
+print(key.size_in_bits())
+print(n.bit_length())
+print("                  P: "+str(p))
+print("                  Q: "+str(q))
 print("Public Key        E: "+str(e))
 print("Public            N: "+str(n))
 
 print("Private Key       D: "+str(d))
-x=random.randrange(int(sqrt(n)))
+x=random.randint(1,n-1)
 print("Message           X: "+str(x))
 
 # Encrypt with public
