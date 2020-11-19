@@ -26,6 +26,7 @@ def eea(a,b):
         b=c
     
     return a,t0%original_a
+
 import random
 
 ## Fermat Primiality Test
@@ -50,10 +51,23 @@ def prime(a):
 ## Python3.9 Required to test!
 ## Not super accurate though ;(
 
+import sys
+
 def prng(n=128):
-    rand = int.from_bytes(random.randbytes(n),"big")
-    while not is_prime(rand):
+    if sys.version_info[1] >= 9 :
         rand = int.from_bytes(random.randbytes(n),"big")
+        while not is_prime(rand):
+            rand = int.from_bytes(random.randbytes(n),"big")
+        return rand
+    else:
+        old_prng(n*8)
+
+## "Legacy" and slower but more accurate prng
+
+def old_prng(n=1024):
+    rand  = random.randrange(pow(2,n-1),pow(2,n) -1)
+    while not is_prime(rand):
+        rand  = random.randrange(pow(2,n-1),pow(2,n) -1)
     return rand
 
 ## Public Exponend computer
@@ -81,6 +95,7 @@ def rsa_keypair(s=2048):
     q = 0
     n = 0
     while(p == q):
+        # prng() takes size in bytes
         p = prng(size_p//8)
         q = prng(size_q//8)
     n       = p*q
@@ -100,6 +115,7 @@ def rsa_decrypt_byte(encrypted,d,n):
 def rsa_encrypt(mess,e,n):
     enc = list(mess)
     return list(map(lambda x: rsa_encrypt_byte(x,e,n), mess))
+
 # Take a list as an input
 def rsa_decrypt(mess,d,n):
     return bytes(list(map(lambda x: rsa_decrypt_byte(x,d,n), mess)))
