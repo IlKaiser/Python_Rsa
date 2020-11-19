@@ -1,6 +1,6 @@
 from rsa import *
 from Crypto.PublicKey import RSA
-e,d,n = rsa_keypair(1024)
+e,d,n = rsa_keypair(2048)
 key=RSA.construct((n,e,d), consistency_check=True)
 print(key.export_key())
 print(key.publickey().export_key())
