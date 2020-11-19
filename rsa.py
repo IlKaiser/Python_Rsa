@@ -6,6 +6,7 @@ RSA  python implementation
 
 ## Extended Euclidean Algorithm for 
 ## multiplicative inverse
+
 def eea(a,b):
     # Init
     t0=0
@@ -27,7 +28,7 @@ def eea(a,b):
     return a,t0%original_a
 import random
 
-## Fermat Primiality test
+## Fermat Primiality Test
 
 def is_prime(a):
     if a < 4:
@@ -47,14 +48,16 @@ def prime(a):
 
 ## Prime random number generator
 ## Python3.9 Required to test!
+## Not super accurate though ;(
+
 def prng(n=128):
-    rand=int.from_bytes(random.randbytes(n),"big")
-    print("Size: "+str(rand.bit_length()))
-    while not is_prime(rand) :
-        rand=int.from_bytes(random.randbytes(n),"big")
+    rand = int.from_bytes(random.randbytes(n),"big")
+    while not is_prime(rand):
+        rand = int.from_bytes(random.randbytes(n),"big")
     return rand
 
 ## Public Exponend computer
+
 def public_exp(phi, standard=True):
     # Default e acording to standards
     if standard:
@@ -67,66 +70,36 @@ def public_exp(phi, standard=True):
         a,_ = eea(phi,e)
     return e
 
-def rsa_keypair(n=2048):
-    size_q = n // 2
-    size_p = n - size_q
-    print(size_q)
+##
+## RSA Core
+##
+
+def rsa_keypair(s=2048):
+    size_q = s // 2
+    size_p = s - size_q
     p = 0
     q = 0
+    n = 0
     while(p == q):
         p = prng(size_p//8)
         q = prng(size_q//8)
-    n   = p*q
-    phi = (p-1)*(q-1)
-    e   = public_exp(phi)
+    n       = p*q
+    phi     = (p-1)*(q-1)
+    e       = public_exp(phi)
     one,d   = eea(phi,e)
     assert one == (e*d)%phi == 1
     return e,d,n
-def rsa_keypair_debug(n=2048):
-    size_q = n // 2
-    size_p = n - size_q
-    print(size_q)
-    p = 0
-    q = 0
-    while(p == q):
-        p = prng(size_p//8)
-        q = prng(size_q//8)
-    n   = p*q
-    phi = (p-1)*(q-1)
-    e   = public_exp(phi)
-    one,d   = eea(phi,e)
-    assert one == (e*d)%phi == 1
-    return e,d,n,p,q,phi
 
-def rsa_encrypt(mess,e,n):
+def rsa_encrypt_byte(mess,e,n):
     return pow(mess,e,n)
 
-def rsa_decrypt(encrypted,d,n):
+def rsa_decrypt_byte(encrypted,d,n):
     return pow(encrypted,d,n)
 
-
-from Crypto.PublicKey import RSA
-e,d,n,p,q,phi = rsa_keypair_debug()
-key=RSA.construct((n,e,d), consistency_check=True)
-print(key.export_key())
-print(key.publickey().export_key())
-print(key.size_in_bits())
-print(n.bit_length())
-print("                  P: "+str(p))
-print("                  Q: "+str(q))
-print("Public Key        E: "+str(e))
-print("Public            N: "+str(n))
-
-print("Private Key       D: "+str(d))
-x=random.randint(1,n-1)
-print("Message           X: "+str(x))
-
-# Encrypt with public
-y   = rsa_encrypt(x,e,n)
-print("Encrypted Message Y: "+str(y))
-
-# Decrypt with private
-dec = rsa_decrypt(y,d,n)
-
-print("Decrypted Message  : "+str(dec))
-print("Is ok? [True/False]: "+str(dec == x))
+# Take bytes as an input
+def rsa_encrypt(mess,e,n):
+    enc = list(mess)
+    return list(map(lambda x: rsa_encrypt_byte(x,e,n), mess))
+# Take a list as an input
+def rsa_decrypt(mess,d,n):
+    return bytes(list(map(lambda x: rsa_decrypt_byte(x,d,n), mess)))
