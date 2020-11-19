@@ -60,7 +60,7 @@ def prng(n=128):
             rand = int.from_bytes(random.randbytes(n),"big")
         return rand
     else:
-        old_prng(n*8)
+        return old_prng(n*8)
 
 ## "Legacy" and slower but more accurate prng
 
