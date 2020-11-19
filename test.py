@@ -1,5 +1,6 @@
+from rsa import *
 from Crypto.PublicKey import RSA
-e,d,n = rsa_keypair(2048)
+e,d,n = rsa_keypair(1024)
 key=RSA.construct((n,e,d), consistency_check=True)
 print(key.export_key())
 print(key.publickey().export_key())
@@ -16,6 +17,7 @@ print("Encryption Done!")
 
 # Decrypt with private
 dec = rsa_decrypt(y,d,n)
+print("Decryption Done!")
 
 #print("Decrypted Message  : "+str(dec))
 print("Is ok? [True/False]: "+str(dec == x)) 
