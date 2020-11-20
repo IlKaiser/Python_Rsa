@@ -14,7 +14,7 @@ print(key.export_key())
 print(key.publickey().export_key())
 print(key.size_in_bits())
 
-# 1K test
+# .1K test
 x=b'a'*100
 
 start = time.time()
@@ -40,6 +40,7 @@ print(keypy.size_in_bits())
 
 from Crypto.Cipher import PKCS1_OAEP
 # Encryption test
+x = b'a'*100
 start = time.time()
 cipher_rsa = PKCS1_OAEP.new(key.publickey())
 encpy = cipher_rsa.encrypt(x)
